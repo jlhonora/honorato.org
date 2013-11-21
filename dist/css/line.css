@@ -1,0 +1,23 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  width:0px;
+  shape-rendering:"crispEdges";
+}
+
+.x.axis path {
+/*  display: none; */
+}
+
+.line-temp {
+  fill: none;
+  stroke: #851;
+  stroke-width: 2px;
+}
+
+.line-hum {
+  fill: none;
+  stroke: #029;
+  stroke-width: 2px;
+}
