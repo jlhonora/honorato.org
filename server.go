@@ -110,7 +110,13 @@ func formatGithubEvent(event *simplejson.Json) ([]byte, error) {
 			target_url = "https://github.com/" + target_name
 			ref, _ := event.Get("payload").Get("ref").String()
 			ref_type, _ := event.Get("payload").Get("ref_type").String()
-			body = "Created " + ref_type + " " + ref + " on"
+			body = "Created "
+			if ref_type != "" {
+				body += ref_type + " "
+			}
+			if ref != "" {
+				body += ref + " "
+			}
 			break
 		case "ForkEvent":
 			target_name, _ = event.Get("repo").Get("name").String()
@@ -185,20 +191,20 @@ func githubHandler(w http.ResponseWriter, r *http.Request) {
 
 func handleResources() {
 	fmt.Println("Handling resources")
-	http.Handle("/dist/", 
-		http.StripPrefix("/dist/", 
+	http.Handle("/dist/",
+		http.StripPrefix("/dist/",
 		http.FileServer(http.Dir("dist"))))
-	http.Handle("/dist/css/", 
-		http.StripPrefix("/dist/css/", 
+	http.Handle("/dist/css/",
+		http.StripPrefix("/dist/css/",
 		http.FileServer(http.Dir("dist/css"))))
-	http.Handle("/dist/js/", 
-		http.StripPrefix("/dist/js/", 
+	http.Handle("/dist/js/",
+		http.StripPrefix("/dist/js/",
 		http.FileServer(http.Dir("dist/js"))))
-	http.Handle("/dist/fonts/", 
-		http.StripPrefix("/dist/fonts/", 
+	http.Handle("/dist/fonts/",
+		http.StripPrefix("/dist/fonts/",
 		http.FileServer(http.Dir("dist/fonts"))))
-	http.Handle("/static/", 
-		http.StripPrefix("/static/", 
+	http.Handle("/static/",
+		http.StripPrefix("/static/",
 		http.FileServer(http.Dir("static"))))
 	fmt.Println("Done handling resources")
 }
@@ -247,6 +253,7 @@ func getGithubDbData() ([]byte, error) {
 func dbTest() {
 	fmt.Println("Testing db")
 	db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
+	defer db.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -268,6 +275,14 @@ func dbTest() {
     if err := rows.Err(); err != nil {
             log.Fatal(err)
     }
+	fmt.Println("Testing insert")
+	_, err = db.Exec(`INSERT INTO activities VALUES (` + "'github', '" + "test_body" + "', '" + "target_name" + "', '" + "target_url" + "', '" + time.Now().Format(time.RFC3339) + "')")
+	if err != nil {
+		fmt.Println("Error inserting")
+		fmt.Println(err)
+	} else {
+		fmt.Println("Insert OK")
+	}
 }
 
 func periodic() {
@@ -277,23 +292,39 @@ func periodic() {
 		for {
 		   select {
 			case <- ticker.C:
+				db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
+				if err != nil {
+					log.Fatal(err)
+				}
 				// do stuff
 				fmt.Println("Tick")
 				body, err := getGithubData()
 				json, err := simplejson.NewJson(body)
 
 				arr, err := json.Array()
-				if err == nil {
+				if err != nil {
 					return
 				}
 				var index int
 				for index < len(arr) {
-					//activity_type := "github"
-					body, _ := json.Get("body").String()
-					//target_name, _ := json.Get("target").Get("name").String()
-					//target_url, _ := json.Get("target").Get("name_url").String()
-					created_at, _ := json.Get("created_at").String()
+					var total_err error
+					body, err := json.GetIndex(index).Get("body").String()
+					if err != nil { total_err = nil }
+					target_name, err := json.GetIndex(index).Get("target").Get("name").String()
+					if err != nil { total_err = nil }
+					target_url, err := json.GetIndex(index).Get("target").Get("name_url").String()
+					if err != nil { total_err = nil }
+					created_at, err := json.GetIndex(index).Get("created_at").String()
+					if err != nil { total_err = nil }
+					if total_err != nil {
+						continue;
+					}
 					fmt.Println("Event: " + body + " " + created_at)
+					_, err = db.Exec(`INSERT INTO activities VALUES (` + "'github', '" + body + "', '" + target_name + "', '" + target_url + "', '" + created_at + "')")
+					if err != nil {
+						fmt.Println("Error inserting")
+						fmt.Println(err)
+					}
 					index++
 				}
 
