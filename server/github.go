@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"time"
-	"log"
-	"strings"
 	"database/sql"
-	"net/http"
+	"fmt"
 	"github.com/bitly/go-simplejson"
+	"log"
+	"net/http"
+	"strings"
+	"time"
 )
 
 func getGithubData() ([]byte, error) {
@@ -57,13 +57,13 @@ func getGithubDbData() ([]byte, error) {
 	if err != nil {
 		log.Println(err)
 	}
-    rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' LIMIT 10")
-    if err != nil {
-            log.Println(err)
-    }
+	rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' LIMIT 10")
+	if err != nil {
+		log.Println(err)
+	}
 	var all_events_json []string
 	var msg_json string
-    for rows.Next() {
+	for rows.Next() {
 		var id int
 		var activity_type string
 		var body string
@@ -84,10 +84,10 @@ func getGithubDbData() ([]byte, error) {
 		}`
 		fmt.Printf("JSON: %s\n", msg_json)
 		all_events_json = append(all_events_json, msg_json)
-    }
-    if err := rows.Err(); err != nil {
-        log.Println(err)
-    }
+	}
+	if err := rows.Err(); err != nil {
+		log.Println(err)
+	}
 
 	json_str := "[" + strings.Join(all_events_json, ",") + "]"
 	return []byte(json_str), err
@@ -99,60 +99,60 @@ func formatGithubEvent(event *simplejson.Json) ([]byte, error) {
 	event_type, _ := event.Get("type").String()
 	created_at, _ := event.Get("created_at").String()
 	switch event_type {
-		case "FollowEvent":
-			target_name, _ = event.Get("payload").Get("target").Get("login").String()
-			target_url, _ = event.Get("payload").Get("target").Get("html_url").String()
-			body = "Followed"
-			break
-		case "PushEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url = "https://github.com/" + target_name
-			body = "Pushed to"
-			break
-		case "PullRequestEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url, _ = event.Get("payload").Get("pull_request").Get("html_url").String()
-			action, _ := event.Get("payload").Get("action").String()
-			body = action + " pull request on"
-			break
-		case "IssueCommentEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url, _ = event.Get("payload").Get("issue").Get("html_url").String()
-			body = "Commented on"
-			break
-		case "ReleaseEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url, _ = event.Get("payload").Get("release").Get("html_url").String()
-			ref, _ := event.Get("payload").Get("release").Get("name").String()
-			ref_type, _ := event.Get("payload").Get("action").String()
-			body = ref_type + " " + ref + " on"
-			break
-		case "CreateEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url = "https://github.com/" + target_name
-			ref, _ := event.Get("payload").Get("ref").String()
-			ref_type, _ := event.Get("payload").Get("ref_type").String()
-			body = "Created "
-			if ref_type != "" {
-				body += ref_type + " "
-			}
-			if ref != "" {
-				body += ref + " "
-			}
-			break
-		case "ForkEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url, _ = event.Get("payload").Get("forkee").Get("html_url").String()
-			body = "Forked"
-			break
-		case "PullRequestReviewCommentEvent":
-			target_name, _ = event.Get("repo").Get("name").String()
-			target_url, _ = event.Get("payload").Get("comment").Get("html_url").String()
-			body = "Commented on pull request for"
-			break
-		default:
-			str, _ := event.Get("type").String()
-			fmt.Print("Unknown type " + str)
+	case "FollowEvent":
+		target_name, _ = event.Get("payload").Get("target").Get("login").String()
+		target_url, _ = event.Get("payload").Get("target").Get("html_url").String()
+		body = "Followed"
+		break
+	case "PushEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url = "https://github.com/" + target_name
+		body = "Pushed to"
+		break
+	case "PullRequestEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url, _ = event.Get("payload").Get("pull_request").Get("html_url").String()
+		action, _ := event.Get("payload").Get("action").String()
+		body = action + " pull request on"
+		break
+	case "IssueCommentEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url, _ = event.Get("payload").Get("issue").Get("html_url").String()
+		body = "Commented on"
+		break
+	case "ReleaseEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url, _ = event.Get("payload").Get("release").Get("html_url").String()
+		ref, _ := event.Get("payload").Get("release").Get("name").String()
+		ref_type, _ := event.Get("payload").Get("action").String()
+		body = ref_type + " " + ref + " on"
+		break
+	case "CreateEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url = "https://github.com/" + target_name
+		ref, _ := event.Get("payload").Get("ref").String()
+		ref_type, _ := event.Get("payload").Get("ref_type").String()
+		body = "Created "
+		if ref_type != "" {
+			body += ref_type + " "
+		}
+		if ref != "" {
+			body += ref + " "
+		}
+		break
+	case "ForkEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url, _ = event.Get("payload").Get("forkee").Get("html_url").String()
+		body = "Forked"
+		break
+	case "PullRequestReviewCommentEvent":
+		target_name, _ = event.Get("repo").Get("name").String()
+		target_url, _ = event.Get("payload").Get("comment").Get("html_url").String()
+		body = "Commented on pull request for"
+		break
+	default:
+		str, _ := event.Get("type").String()
+		fmt.Print("Unknown type " + str)
 	}
 	msg_json = []byte(`{
 		"body": "` + body + `",
@@ -168,4 +168,41 @@ func formatGithubEvent(event *simplejson.Json) ([]byte, error) {
 	msg = created_at + " - " + body + " " + target_name
 	fmt.Println("\nMessage: " + msg)
 	return msg_json, nil
+}
+
+func updateGithubEvents() (error) {
+	body, err := getGithubData()
+	json, err := simplejson.NewJson(body)
+
+	arr, err := json.Array()
+	if err != nil {
+		return
+	}
+	deleteRows("activities", len(arr))
+	var index nt
+	for index < len(arr) {
+		var total_err error
+		body, err := json.GetIndex(index).Get("body").String()
+		if err != nil {
+			total_err = nil
+		}
+		target_name, err := json.GetIndex(index).Get("target").Get("name").String()
+		if err != nil {
+			total_err = nil
+		}
+		target_url, err := json.GetIndex(index).Get("target").Get("name_url").String()
+		if err != nil {
+			total_err = nil
+		}
+		created_at, err := json.GetIndex(index).Get("created_at").String()
+		if err != nil {
+			total_err = nil
+		}
+		if total_err != nil {
+			continue
+		}
+		fmt.Println("Event: " + body + " " + created_at)
+		insertActivity("github", body, target_name, target_url, created_at)
+		index++
+	}
 }
