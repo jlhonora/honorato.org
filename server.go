@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 	"strings"
+	"strconv"
 	"log"
 	"database/sql"
 	"github.com/bitly/go-simplejson"
@@ -213,23 +214,24 @@ func getGithubDbData() ([]byte, error) {
 	fmt.Println("Querying GitHub DB")
 	db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
     rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' LIMIT 10")
     if err != nil {
-            log.Fatal(err)
+            log.Println(err)
     }
 	var all_events_json []string
 	var msg_json string
     for rows.Next() {
+		var id int
 		var activity_type string
 		var body string
 		var target_name string
 		var target_url string
 		var created_at time.Time
 		fmt.Println("Scanning row")
-		if err := rows.Scan(&activity_type, &body, &target_name, &target_url, &created_at); err != nil {
-				log.Fatal(err)
+		if err := rows.Scan(&id, &activity_type, &body, &target_name, &target_url, &created_at); err != nil {
+			log.Println(err)
 		}
 		msg_json = `{
 			"body": "` + body + `",
@@ -243,7 +245,7 @@ func getGithubDbData() ([]byte, error) {
 		all_events_json = append(all_events_json, msg_json)
     }
     if err := rows.Err(); err != nil {
-            log.Fatal(err)
+        log.Println(err)
     }
 
 	json_str := "[" + strings.Join(all_events_json, ",") + "]"
@@ -276,12 +278,35 @@ func dbTest() {
             log.Fatal(err)
     }
 	fmt.Println("Testing insert")
-	_, err = db.Exec(`INSERT INTO activities VALUES (` + "'github', '" + "test_body" + "', '" + "target_name" + "', '" + "target_url" + "', '" + time.Now().Format(time.RFC3339) + "')")
+	_, err = db.Exec(`INSERT INTO activities (activity_type, body, target_name, target_url, created_at) ` +
+					 `VALUES (` +
+						"'github', '" +
+						"test_body" +
+						"', '" + "target_name" +
+						"', '" + "target_url" +
+						"', '" + time.Now().Format(time.RFC3339) +
+					  "')")
 	if err != nil {
 		fmt.Println("Error inserting")
 		fmt.Println(err)
 	} else {
 		fmt.Println("Insert OK")
+	}
+}
+
+func deleteRows(db *sql.DB, table_name string, num int) {
+	fmt.Println("Deleting " + strconv.Itoa(num) + " rows from " + table_name)
+	_, err := db.Exec(`DELETE FROM ` + table_name +
+						` WHERE ctid IN (
+							SELECT ctid
+							FROM ` + table_name +
+							` ORDER BY id` +
+							` LIMIT ` + strconv.Itoa(num) +
+						`)`)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Delete OK")
 	}
 }
 
@@ -305,6 +330,7 @@ func periodic() {
 				if err != nil {
 					return
 				}
+				deleteRows(db, "activities", len(arr))
 				var index int
 				for index < len(arr) {
 					var total_err error
@@ -320,7 +346,12 @@ func periodic() {
 						continue;
 					}
 					fmt.Println("Event: " + body + " " + created_at)
-					_, err = db.Exec(`INSERT INTO activities VALUES (` + "'github', '" + body + "', '" + target_name + "', '" + target_url + "', '" + created_at + "')")
+					_, err = db.Exec(`INSERT INTO activities (activity_type, body, target_name, target_url, created_at) ` +
+							`VALUES (` + "'github', '" +
+								body		+ "', '" +
+								target_name + "', '" +
+								target_url	+ "', '" +
+								created_at	+	 "')")
 					if err != nil {
 						fmt.Println("Error inserting")
 						fmt.Println(err)
