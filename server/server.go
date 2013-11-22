@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
@@ -42,19 +41,19 @@ func handleResources() {
 	fmt.Println("Handling resources")
 	http.Handle("/dist/",
 		http.StripPrefix("/dist/",
-			http.FileServer(http.Dir("dist"))))
+			http.FileServer(http.Dir("../dist"))))
 	http.Handle("/dist/css/",
 		http.StripPrefix("/dist/css/",
-			http.FileServer(http.Dir("dist/css"))))
+			http.FileServer(http.Dir("../dist/css"))))
 	http.Handle("/dist/js/",
 		http.StripPrefix("/dist/js/",
-			http.FileServer(http.Dir("dist/js"))))
+			http.FileServer(http.Dir("../dist/js"))))
 	http.Handle("/dist/fonts/",
 		http.StripPrefix("/dist/fonts/",
-			http.FileServer(http.Dir("dist/fonts"))))
+			http.FileServer(http.Dir("../dist/fonts"))))
 	http.Handle("/static/",
 		http.StripPrefix("/static/",
-			http.FileServer(http.Dir("static"))))
+			http.FileServer(http.Dir("../static"))))
 	fmt.Println("Done handling resources")
 }
 
@@ -67,7 +66,7 @@ func periodic() {
 			case <-ticker.C:
 				// do stuff
 				fmt.Println("Tick")
-				err = updateGithubEvents()
+				updateGithubEvents()
 
 			case <-quit:
 				ticker.Stop()

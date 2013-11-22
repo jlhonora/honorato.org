@@ -176,10 +176,10 @@ func updateGithubEvents() (error) {
 
 	arr, err := json.Array()
 	if err != nil {
-		return
+		return err
 	}
 	deleteRows("activities", len(arr))
-	var index nt
+	var index int
 	for index < len(arr) {
 		var total_err error
 		body, err := json.GetIndex(index).Get("body").String()
@@ -205,4 +205,5 @@ func updateGithubEvents() (error) {
 		insertActivity("github", body, target_name, target_url, created_at)
 		index++
 	}
+	return err
 }

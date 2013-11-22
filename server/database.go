@@ -50,21 +50,25 @@ func dbTest() {
 	}
 }
 
-var db *sql.DB
+var DB *sql.DB
 func dbinit() (error) {
 	db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
 	if err != nil {
 		log.Println(err)
+	} else {
+		DB = db
 	}
+	return err
 }
 
 func dbclose() (error) {
-	db.Close()
+	DB.Close()
+	return nil
 }
 
 func deleteRows(table_name string, num int) {
 	fmt.Println("Deleting " + strconv.Itoa(num) + " rows from " + table_name)
-	_, err := db.Exec(`DELETE FROM ` + table_name +
+	_, err := DB.Exec(`DELETE FROM ` + table_name +
 		` WHERE ctid IN (
 							SELECT ctid
 							FROM ` + table_name +
@@ -79,7 +83,7 @@ func deleteRows(table_name string, num int) {
 }
 
 func insertActivity(activity_type string, body string, target_name string, target_url string, created_at string) (error) {
-	_, err := db.Exec(`INSERT INTO activities (activity_type, body, target_name, target_url, created_at) ` +
+	_, err := DB.Exec(`INSERT INTO activities (activity_type, body, target_name, target_url, created_at) ` +
 		`VALUES ('` + activity_type + "', '" +
 		body + "', '" +
 		target_name + "', '" +
@@ -91,6 +95,3 @@ func insertActivity(activity_type string, body string, target_name string, targe
 	}
 	return err;
 }
-
-
-
