@@ -1,4 +1,4 @@
-$.getJSON( "http://localhost:7654/github", function( data ) {
+$.getJSON( "http://localhost:7654/api/github", function( data ) {
 	var items = [];
 
 	$.each( data, function( key, val ) {
