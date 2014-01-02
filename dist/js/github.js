@@ -15,5 +15,10 @@ $.getJSON( "http://localhost:7654/api/github", function( data ) {
 			+ val['readable_date'] + "</p></li>" );
 	});
 
-	$("#github-table").append(items.join(""));
+	// Only show the table if it has items
+	if(items.length > 0) {
+		$("#github-table").append(items.join(""));
+		$("#sidebar").show();
+		$("#github-wrapper").show();
+	}
 });

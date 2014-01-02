@@ -60,5 +60,11 @@
 		  .datum(data)
 		  .attr("class", "line-temp")
 		  .attr("d", line);
+
+      // Show the element that holds this graph
+      $("#sidebar").show();
+      $("#iot-wrapper").show();
+	
 	});
+	
 })();

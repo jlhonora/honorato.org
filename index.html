@@ -20,30 +20,30 @@
     
     <div class="container">
       <div class="page-header">
-          <!--h1>José L. Honorato</h1-->
-          <!--p class="lead">Electrical Engineer working in Software and Hardware</p-->
-          <!--div id="chart" style="float:right">
+          <h1>José L. Honorato</h1>
+          <p class="lead">Electrical Engineer working with Software and Hardware</p>
+          <div id="chart" style="float:right">
             <script src="dist/js/line.js"></script>
-          </div-->
+          </div>
       </div>
 
       <span class="col-md-6" style="padding-left:0px">
-        <!--h3>About me</h3>
+        <h3>About me</h3>
         <p>I'm a passionate engineer, I work at my own company building <a href="http://satelinx.com">hardware</a> and <a href="http://beetrack.cl">software</a>.
            I studied at <a href="http://www.ing.puc.cl">PUC</a> where I stayed as a part-time teacher. Have a look at my <a href="static/resume.pdf">resume</a>.</p>
 
         <p>You can reach me on <a href="http://www.linkedin.com/in/jlhonora">LinkedIn</a>,
-           <a href="http://github.com/jlhonora">Github</a> or <a href="mailto:jlhonora@ing.puc.cl">e-mail</a>.</p-->
+           <a href="http://github.com/jlhonora">Github</a> or <a href="mailto:jlhonora@ing.puc.cl">e-mail</a>.</p>
       </span>
-      <span class="col-md-4" style="padding-left:0px; float:right">
+      <span class="col-md-4" style="padding-left:0px; float:right" id="sidebar">
         <h3>Activity</h3>
         <!-- The elements of this table are loaded dynamically with github.js -->
-        <div class="gtable-wrapper">
+        <div class="gtable-wrapper" id="github-wrapper">
           <h4>Github</h4>
           <ul class="gtable" id="github-table"/>
         </div>
         <br />
-        <div class="graph-wrapper">
+        <div class="graph-wrapper" id="iot-wrapper">
           <h4>IoT</h4>
           <div id="main-temp-graph">
           </div>
@@ -59,6 +59,8 @@
     <script type="text/javascript" src="dist/js/bootstrap.min.js"></script>
     <!-- Used for date formatting -->
     <script type="text/javascript" src="dist/js/moment.min.js"></script>
+    <!-- Hide some elements before calling the APIs -->
+    <script type="text/javascript" src="dist/js/preapi.js"></script>
     <!-- Loads Github's public activity -->
     <script type="text/javascript" src="dist/js/github.js"></script>
     <!--script type="text/javascript" src="dist/js/github_test.js"></script-->
