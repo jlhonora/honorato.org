@@ -41,9 +41,8 @@ func getGithubData() ([]byte, error) {
 	return []byte(json_str), err
 }
 
+// Handles Github activities API request
 func githubHandler(w http.ResponseWriter, r *http.Request) {
-	//fmt.Fprint(w, "This is the index")
-	//body, err := getGithubData()
 	body, err := getGithubDbData()
 	fmt.Fprint(w, string(body))
 	if err != nil {
@@ -51,13 +50,16 @@ func githubHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Queries the database for github activities and transforms them
+// to JSON format
 func getGithubDbData() ([]byte, error) {
 	fmt.Println("Querying GitHub DB")
 	db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
 	if err != nil {
 		log.Println(err)
 	}
-	rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' LIMIT 10")
+	// Select the most recent 10 entries
+	rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' ORDER BY created_at LIMIT 10")
 	if err != nil {
 		log.Println(err)
 	}
@@ -184,25 +186,28 @@ func updateGithubEvents() (error) {
 		var total_err error
 		body, err := json.GetIndex(index).Get("body").String()
 		if err != nil {
-			total_err = nil
+			total_err = err
 		}
 		target_name, err := json.GetIndex(index).Get("target").Get("name").String()
 		if err != nil {
-			total_err = nil
+			total_err = err
 		}
 		target_url, err := json.GetIndex(index).Get("target").Get("name_url").String()
 		if err != nil {
-			total_err = nil
+			total_err = err
 		}
 		created_at, err := json.GetIndex(index).Get("created_at").String()
 		if err != nil {
-			total_err = nil
+			total_err = err
 		}
-		if total_err != nil {
-			continue
+		// If there was an error or the body is empty then just return
+		if total_err != nil || len(body) == 0 {
+			fmt.Println("Error processing entry")
+		} else {
+			fmt.Println("Event: " + body + " " + created_at)
+			insertActivity("github", body, target_name, target_url, created_at)
 		}
-		fmt.Println("Event: " + body + " " + created_at)
-		insertActivity("github", body, target_name, target_url, created_at)
+		// Process the next element
 		index++
 	}
 	return err
