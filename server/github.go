@@ -59,7 +59,7 @@ func getGithubDbData() ([]byte, error) {
 		log.Println(err)
 	}
 	// Select the most recent 10 entries
-	rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' ORDER BY created_at LIMIT 10")
+	rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' ORDER BY created_at DESC LIMIT 10")
 	if err != nil {
 		log.Println(err)
 	}
