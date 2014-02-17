@@ -23,8 +23,7 @@ a {
 
 a:hover {
   color: #851;
-  text-decoration: none;
-  font-weight: bold;
+  text-decoration: underline;
 }
 
 ul.gtable {
