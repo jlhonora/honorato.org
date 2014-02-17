@@ -1,13 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"html/template"
 	"log"
 	"net/http"
-	"regexp"
 	"time"
 )
 
@@ -24,17 +22,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling index")
 	renderTemplate(w, "index")
 	fmt.Println("Done")
-}
-
-var validPath = regexp.MustCompile("^/(edit|save|view|)/([a-zA-Z0-9]+)$")
-
-func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
-	m := validPath.FindStringSubmatch(r.URL.Path)
-	if m == nil {
-		http.NotFound(w, r)
-		return "", errors.New("Invalid Page Title")
-	}
-	return m[2], nil // The title is the second subexpression.
 }
 
 func handleResources() {
@@ -64,7 +51,6 @@ func periodic() {
 		for {
 			select {
 			case <-ticker.C:
-				// do stuff
 				fmt.Println("Tick")
 				updateGithubEvents()
 
