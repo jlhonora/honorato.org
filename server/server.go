@@ -68,6 +68,7 @@ func main() {
 	periodic()
 	http.HandleFunc("/api/github", githubHandler)
 	http.HandleFunc("/api/iot", iotHandler)
+	http.HandleFunc("/broadcast", genericHttpHandler)
 	http.HandleFunc("/", indexHandler)
 	handleResources()
 	log.Fatal(http.ListenAndServe(":7654", nil))
