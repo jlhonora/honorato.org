@@ -172,7 +172,7 @@ func formatGithubEvent(event *simplejson.Json) ([]byte, error) {
 	return msg_json, nil
 }
 
-func updateGithubEvents() (error) {
+func updateGithubEvents() error {
 	body, err := getGithubData()
 	json, err := simplejson.NewJson(body)
 

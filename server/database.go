@@ -51,7 +51,8 @@ func dbTest() {
 }
 
 var DB *sql.DB
-func dbinit() (error) {
+
+func dbinit() error {
 	db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
 	if err != nil {
 		log.Println(err)
@@ -61,7 +62,7 @@ func dbinit() (error) {
 	return err
 }
 
-func dbclose() (error) {
+func dbclose() error {
 	DB.Close()
 	return nil
 }
@@ -82,7 +83,8 @@ func deleteRows(table_name string, num int) {
 	}
 }
 
-func insertActivity(activity_type string, body string, target_name string, target_url string, created_at string) (error) {
+/* TODO: Fix the query, it could be used for SQL injection attacks */
+func insertActivity(activity_type string, body string, target_name string, target_url string, created_at string) error {
 	_, err := DB.Exec(`INSERT INTO activities (activity_type, body, target_name, target_url, created_at) ` +
 		`VALUES ('` + activity_type + "', '" +
 		body + "', '" +
@@ -93,5 +95,5 @@ func insertActivity(activity_type string, body string, target_name string, targe
 		fmt.Println("Error inserting")
 		fmt.Println(err)
 	}
-	return err;
+	return err
 }
