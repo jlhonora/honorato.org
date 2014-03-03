@@ -57,11 +57,13 @@ func getGithubDbData() ([]byte, error) {
 	db, err := sql.Open("postgres", "user=pgmainuser dbname=pgmaindb sslmode=disable")
 	if err != nil {
 		log.Println(err)
+		return nil, err
 	}
 	// Select the most recent 10 entries
 	rows, err := db.Query("SELECT * FROM activities WHERE activity_type LIKE 'github' ORDER BY created_at DESC LIMIT 10")
 	if err != nil {
 		log.Println(err)
+		return nil, err
 	}
 	var all_events_json []string
 	var msg_json string
@@ -75,6 +77,7 @@ func getGithubDbData() ([]byte, error) {
 		fmt.Println("Scanning row")
 		if err := rows.Scan(&id, &activity_type, &body, &target_name, &target_url, &created_at); err != nil {
 			log.Println(err)
+			continue
 		}
 		msg_json = `{
 			"body": "` + body + `",
@@ -204,7 +207,7 @@ func updateGithubEvents() error {
 		if total_err != nil || len(body) == 0 {
 			fmt.Println("Error processing entry")
 		} else {
-			fmt.Println("Event: " + body + " " + created_at)
+			fmt.Println("Event: " + body + " " + target_name + " " + created_at)
 			insertActivity("github", body, target_name, target_url, created_at)
 		}
 		// Process the next element
