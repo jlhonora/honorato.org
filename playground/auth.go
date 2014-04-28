@@ -3,15 +3,12 @@ package main
 import (
 	"fmt"
 	auth "github.com/abbot/go-http-auth"
+	"log"
 	"net/http"
 )
 
 func Secret(user, realm string) string {
-	if user == "john" {
-		// password is "hello"
-		return "$1$dlPL2MqE$oQmn16q49SqdmhenQuNgs1"
-	}
-	return ""
+	return getPassword(user)
 }
 
 func handle(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
@@ -19,7 +16,11 @@ func handle(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 }
 
 func main() {
+	log.Printf("Init")
+	dbinit()
+	defer dbclose()
 	authenticator := auth.NewBasicAuthenticator("127.0.0.1", Secret)
 	http.HandleFunc("/", authenticator.Wrap(handle))
+	log.Printf("Ready")
 	http.ListenAndServe(":8080", nil)
 }
