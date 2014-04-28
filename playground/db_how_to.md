@@ -24,3 +24,8 @@ INSERT INTO users VALUES (default, 'somevalue', 'someothervalue', now());
 ```
 SELECT * FROM users;
 ```
+
+9. Change it:
+```
+UPDATE users SET (password) = ('newvalue') WHERE id = 1;
+```
